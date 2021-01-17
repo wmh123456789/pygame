@@ -6,17 +6,19 @@ from collections import OrderedDict
 import pygame
 
 FPS = 60
-SHAPE = 4         # 棋盘shape
-CELL_SIZE = 100   # 方格大小
-CELL_GAP_SIZE = 10  # 方格间距
-MARGIN = 10  # 方格的margin
-PADDING = 10  # 方格的padding
+SHAPE = 4  # 棋盘shape
+CELL_SIZE = 100  # 方格大小
+CELL_GAP_SIZE = (int)(0.08*CELL_SIZE)  # 方格间距
+BORDER_R = (int)(0.15*CELL_SIZE) # 方格圆角半径
+MARGIN = (int)(0.08*CELL_SIZE)  # 方格的margin
+PADDING = (int)(0.08*CELL_SIZE)  # 方格的padding
 SCREEN_WIDTH = (CELL_SIZE + MARGIN) * SHAPE + MARGIN  # 屏幕宽度
 SCREEN_HEIGHT = (CELL_SIZE + MARGIN) * SHAPE + MARGIN  # 屏幕高度
 
 BACKGROUND_COLOR = "#92877d"  # 背景颜色
 BACKGROUND_EMPTY_CELL_COLOR = "#9e948a"  # 空方格颜色
 BACKGROUND_CELL_COLOR = "#edc22e"  # 方格颜色
+
 
 # 定义两个元组相加
 def tuple_add(t1, t2):
@@ -27,6 +29,7 @@ class Logic:
     def __init__(self, shape=4):
         self.shape = int(shape) if shape > 2 else 4  # 初始化形状
         self.tiles = OrderedDict()  # 初始化数据
+        self.stepCnt = 0
         self.neighbors = [  # 定义方向矢量
             [1, 0],  # 下
             [-1, 0],  # 上
@@ -35,6 +38,15 @@ class Logic:
         ]
         self.click_dict = {'x': {}, 'y': {}}  # 定义鼠标点击坐标转换下标的数据
         self.init_load()  # 初始化加载
+
+    def __str__(self):
+        game_str = 'Game after {} steps \n'.format(self.stepCnt)
+        for row in range(self.shape):
+            line_str = ''
+            for col in range(self.shape):
+                line_str += '{:02} '.format(self.tiles[(row, col)])
+            game_str += line_str + '\n'
+        return game_str
 
     def init_load(self):
         count = 1
@@ -45,8 +57,13 @@ class Logic:
                 self.tiles[mark] = count
                 count += 1
         self.tiles[mark] = 0
+        self.empty = mark
+        self.stepCnt = 0
 
-        for count in range(200):  # 随机移动n次
+
+    def shuffleTiles(self, n=200):
+        mark = self.empty
+        for count in range(n):  # 随机移动n次
             neighbor = random.choice(self.neighbors)
             spot = tuple_add(mark, neighbor)
 
@@ -77,20 +94,21 @@ class Logic:
         # 移动数据
         for neighbor in self.neighbors:
             spot = tuple_add(mark, neighbor)
-
             # If click is available, exchange tile of clicked one and empty one
             if spot in self.tiles and self.tiles[spot] is 0:
                 self.tiles[spot], self.tiles[mark] = self.tiles[mark], self.tiles[spot]
                 self.empty = mark
+                self.stepCnt += 1
                 break
 
     # move for keydown
     def move2(self, neighbor):
-        spot = tuple_add(neighbor,self.empty)
+        spot = tuple_add(neighbor, self.empty)
         if spot in self.tiles:
             self.tiles[spot], self.tiles[self.empty] = self.tiles[self.empty], self.tiles[spot]
             self.empty = spot
-        pass
+            self.stepCnt += 1
+    pass
 
     def click_to_move(self, x, y):
         # 点击移动
@@ -111,14 +129,14 @@ class Logic:
         self.move((y1, x1))
 
     def key_to_move(self, direction):
-        if direction == 'left':
-            self.move2((0,1))
-        elif direction == 'right':
-            self.move2((0,-1))
-        elif direction == 'up':
+        if direction in ['L', 'left']:
+            self.move2((0, 1))
+        elif direction in ['R', 'right']:
+            self.move2((0, -1))
+        elif direction in ['U', 'up']:
             self.move2((1, 0))
-        elif direction == 'down':
-            self.move2((-1,0))
+        elif direction in ['D', 'down']:
+            self.move2((-1, 0))
         else:
             print("Invalid direction: {}".format(direction))
         pass
@@ -153,7 +171,8 @@ def draw_num(logic, screen):
 
             x = MARGIN * (c + 1) + c * CELL_SIZE
             y = MARGIN * (r + 1) + r * CELL_SIZE
-            pygame.draw.rect(screen, color, (x, y, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, color, (x, y, CELL_SIZE, CELL_SIZE),
+                             border_radius=BORDER_R)
             if num is not 0:
                 font_size = int((CELL_SIZE - PADDING) / 1.3)
                 font = pygame.font.SysFont('arialBlod', font_size)
@@ -161,6 +180,7 @@ def draw_num(logic, screen):
                 screen.blit(font.render(str(num), True, (255, 255, 255)),
                             (x + (CELL_SIZE - font_width) / 2, y +
                              (CELL_SIZE - font_height) / 2 + 5))
+
 
 def press(is_game_over, logic, COUNT, counts):
     for event in pygame.event.get():
@@ -175,21 +195,22 @@ def press(is_game_over, logic, COUNT, counts):
                 x, y = event.pos
                 logic.click_to_move(int(x), int(y))  # 点击移动
         elif event.type == pygame.KEYDOWN:
-            if event.key in [ord('d'),1073741904]:
+            if event.key in [ord('d'), 1073741904]:
                 print('Press LEFT')
                 logic.key_to_move('left')
-            elif event.key in [ord('a'),1073741903 ]:
+            elif event.key in [ord('a'), 1073741903]:
                 print('Press RIGHT')
                 logic.key_to_move('right')
             elif event.key in [ord('s'), 1073741906]:
                 print('Press UP')
                 logic.key_to_move('up')
-            elif event.key in  [ord('w'),1073741905]:
+            elif event.key in [ord('w'), 1073741905]:
                 print('Press DOWN')
                 logic.key_to_move('down')
             elif event.key in [ord('p')]:
                 print('Init Game')
                 logic.init_load()
+                logic.shuffleTiles()
             elif event.key == 13:  # 游戏结束，回车重开
                 return True
     if COUNT:
@@ -215,6 +236,7 @@ def main():
     screen = init_game()
     clock = pygame.time.Clock()
     logic = Logic(SHAPE)
+    logic.shuffleTiles(200)  # 初始化开局：随机移动n次
     COUNT = pygame.USEREVENT + 1
     pygame.time.set_timer(COUNT, 1000)
     seconds = 0  # 记录时间
