@@ -17,7 +17,7 @@ BACKGROUND_EMPTY_CELL_COLOR = "#9e948a"  # 空方格颜色
 BACKGROUND_CELL_COLOR = "#edc22e"  # 方格颜色
 
 # 定义移动
-class MOVE(Enum):
+class MV(Enum):
     Unknown = '?'
     left = 'L'
     right = 'R'
@@ -29,16 +29,16 @@ def tuple_add(t1, t2):
     return (t1[0] + t2[0], t1[1] + t2[1])
 
 def invMove(move):
-    if move == MOVE.up:
-        return MOVE.down
-    elif move == MOVE.down:
-        return MOVE.up
-    elif move == MOVE.right:
-        return MOVE.left
-    elif move == MOVE.left:
-        return MOVE.right
+    if move == MV.up:
+        return MV.down
+    elif move == MV.down:
+        return MV.up
+    elif move == MV.right:
+        return MV.left
+    elif move == MV.left:
+        return MV.right
     else:
-        return MOVE.unknown
+        return MV.unknown
 
 def genCode(num):
     return '{:X}'.format(num)

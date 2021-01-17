@@ -7,7 +7,7 @@ class hrdStatus(object):
     def __init__(self, stat_code):
         self.code = stat_code
         self.father = None
-        self.fathermove = MOVE.Unknown
+        self.fathermove = MV.Unknown
         self.children = {}
         self.childrenmove = {}
         self.stepCnt = -1
@@ -36,9 +36,9 @@ class hrdController(object):
         pass
 
 
-    def move(self, mv:MOVE):
+    def move(self, mv:MV):
         if self.game.key_to_move(mv.value):
-            self.record.append(mv.value)
+            self.record.append(mv)
             self.currStat = self.game.getStatsCode()
             return True
         else:
@@ -48,10 +48,14 @@ class hrdController(object):
         for mv in mvlist:
             self.move(mv)
 
-    def invreplay(self,mvlist):
+    def reverseRecord(self,mvlist):
         invmove = mvlist.copy()
         invmove.reverse()
-        self.replay(invmove)
+        return [invMove(mv) for mv in invmove]
+
+    def invreplay(self,mvlist):
+        invrecord = self.reverseRecord(mvlist)
+        self.replay(invrecord)
 
 
 
@@ -61,13 +65,20 @@ def test():
     game = Logic(4,4)
     hrd = hrdController(game)
     print(hrd.game)
-    game.key_to_move('R')
-    game.key_to_move('R')
+    # game.key_to_move('R')
+    # game.key_to_move('R')
+    hrd.move(MV.down)
+    hrd.move(MV.right)
+    hrd.move(MV.up)
+    hrd.move(MV.left)
 
     print(game.getStatsCode())
-    print(genCode(10),genCode(2))
 
+    print(hrd.record)
+    print(hrd.game)
 
+    hrd.invreplay(hrd.record)
+    print(hrd.game)
 
     pass
 
