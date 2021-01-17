@@ -4,30 +4,14 @@ import sys
 import random
 from collections import OrderedDict
 import pygame
-
-FPS = 60
-SHAPE = 4  # 棋盘shape
-CELL_SIZE = 100  # 方格大小
-CELL_GAP_SIZE = (int)(0.08*CELL_SIZE)  # 方格间距
-BORDER_R = (int)(0.15*CELL_SIZE) # 方格圆角半径
-MARGIN = (int)(0.08*CELL_SIZE)  # 方格的margin
-PADDING = (int)(0.08*CELL_SIZE)  # 方格的padding
-SCREEN_WIDTH = (CELL_SIZE + MARGIN) * SHAPE + MARGIN  # 屏幕宽度
-SCREEN_HEIGHT = (CELL_SIZE + MARGIN) * SHAPE + MARGIN  # 屏幕高度
-
-BACKGROUND_COLOR = "#92877d"  # 背景颜色
-BACKGROUND_EMPTY_CELL_COLOR = "#9e948a"  # 空方格颜色
-BACKGROUND_CELL_COLOR = "#edc22e"  # 方格颜色
-
-
-# 定义两个元组相加
-def tuple_add(t1, t2):
-    return (t1[0] + t2[0], t1[1] + t2[1])
+from CommonDefine import *
 
 
 class Logic:
-    def __init__(self, shape=4):
-        self.shape = int(shape) if shape > 2 else 4  # 初始化形状
+    def __init__(self, shape_h=4, shape_w=4):
+        # self.shape = int(shape) if shape > 2 else 4  # 初始化形状
+        self.shape_h = shape_h
+        self.shape_w = shape_w
         self.tiles = OrderedDict()  # 初始化数据
         self.stepCnt = 0
         self.neighbors = [  # 定义方向矢量
@@ -41,18 +25,25 @@ class Logic:
 
     def __str__(self):
         game_str = 'Game after {} steps \n'.format(self.stepCnt)
-        for row in range(self.shape):
+        for row in range(self.shape_h):
             line_str = ''
-            for col in range(self.shape):
+            for col in range(self.shape_w):
                 line_str += '{:02} '.format(self.tiles[(row, col)])
             game_str += line_str + '\n'
         return game_str
 
+    def getStatsCode(self):
+        code = ''
+        for row in range(self.shape_h):
+            for col in range(self.shape_w):
+                code += genCode(self.tiles[(row, col)])
+        return code
+
     def init_load(self):
         count = 1
         # 生成正确的序列
-        for x in range(self.shape):
-            for y in range(self.shape):
+        for x in range(self.shape_h):
+            for y in range(self.shape_w):
                 mark = tuple([x, y])
                 self.tiles[mark] = count
                 count += 1
@@ -77,8 +68,8 @@ class Logic:
 
     def init_click_dict(self):
         # 初始化点击坐标转换下标的数据
-        for r in range(self.shape):
-            for c in range(self.shape):
+        for r in range(self.shape_h):
+            for c in range(self.shape_w):
                 x = MARGIN * (c + 1) + c * CELL_SIZE
                 x1 = x + CELL_SIZE
                 click_x = tuple(range(x, x1))
@@ -108,7 +99,9 @@ class Logic:
             self.tiles[spot], self.tiles[self.empty] = self.tiles[self.empty], self.tiles[spot]
             self.empty = spot
             self.stepCnt += 1
-    pass
+            return True
+        else:
+            return False
 
     def click_to_move(self, x, y):
         # 点击移动
@@ -130,20 +123,21 @@ class Logic:
 
     def key_to_move(self, direction):
         if direction in ['L', 'left']:
-            self.move2((0, 1))
+            return self.move2((0, 1))
         elif direction in ['R', 'right']:
-            self.move2((0, -1))
+            return self.move2((0, -1))
         elif direction in ['U', 'up']:
-            self.move2((1, 0))
+            return self.move2((1, 0))
         elif direction in ['D', 'down']:
-            self.move2((-1, 0))
+            return self.move2((-1, 0))
         else:
             print("Invalid direction: {}".format(direction))
+            return False
         pass
 
     def is_win(self):
         # 游戏结束判定
-        if self.tiles[(self.shape - 1, self.shape - 1)] is not 0:
+        if self.tiles[(self.shape_h - 1, self.shape_w - 1)] is not 0:
             return False
         values = list(self.tiles.values())
         for index in range(values.__len__() - 1):
@@ -161,8 +155,8 @@ def init_game():
 
 
 def draw_num(logic, screen):
-    for r in range(logic.shape):
-        for c in range(logic.shape):
+    for r in range(logic.shape_h):
+        for c in range(logic.shape_w):
             num = logic.tiles[(r, c)]
             if num is not 0:
                 color = pygame.Color(BACKGROUND_CELL_COLOR)
@@ -235,7 +229,7 @@ def game_win(screen, logic, clock, text='You Win!'):
 def main():
     screen = init_game()
     clock = pygame.time.Clock()
-    logic = Logic(SHAPE)
+    logic = Logic(SHAPE_H,SHAPE_W)
     logic.shuffleTiles(200)  # 初始化开局：随机移动n次
     COUNT = pygame.USEREVENT + 1
     pygame.time.set_timer(COUNT, 1000)
