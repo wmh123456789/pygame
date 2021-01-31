@@ -1,8 +1,6 @@
 from huarongdao import *
 
 
-
-
 class hrdStatus(object):
     def __init__(self, stat_code):
         self.code = stat_code
@@ -16,8 +14,8 @@ class hrdStatus(object):
         self.father = father
 
     def addChild(self, child, move):
-        self.children.update({child.code:child})
-        self.childrenmove.update({child.code:move})
+        self.children.update({child.code: child})
+        self.childrenmove.update({child.code: move})
 
     def dumpMoves(self):
         stat = self
@@ -35,8 +33,7 @@ class hrdController(object):
         self.currStat = self.game.getStatsCode()
         pass
 
-
-    def move(self, mv:MV):
+    def move(self, mv: MV):
         if self.game.key_to_move(mv.value):
             self.record.append(mv)
             self.currStat = self.game.getStatsCode()
@@ -48,21 +45,18 @@ class hrdController(object):
         for mv in mvlist:
             self.move(mv)
 
-    def reverseRecord(self,mvlist):
+    def reverseRecord(self, mvlist):
         invmove = mvlist.copy()
         invmove.reverse()
         return [invMove(mv) for mv in invmove]
 
-    def invreplay(self,mvlist):
+    def invreplay(self, mvlist):
         invrecord = self.reverseRecord(mvlist)
         self.replay(invrecord)
 
 
-
-
-
 def test():
-    game = Logic(4,4)
+    game = Logic(4, 4)
     hrd = hrdController(game)
     print(hrd.game)
     # game.key_to_move('R')
@@ -81,6 +75,7 @@ def test():
     print(hrd.game)
 
     pass
+
 
 if __name__ == '__main__':
     test()

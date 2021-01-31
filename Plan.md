@@ -1,5 +1,6 @@
 ## Huarongdao
 -[ ] support non-square shape
+-[ ] add row/col sum check
 
 
 ## Game analysis

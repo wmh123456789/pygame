@@ -51,7 +51,6 @@ class Logic:
         self.empty = mark
         self.stepCnt = 0
 
-
     def shuffleTiles(self, n=200):
         mark = self.empty
         for count in range(n):  # 随机移动n次
@@ -229,7 +228,7 @@ def game_win(screen, logic, clock, text='You Win!'):
 def main():
     screen = init_game()
     clock = pygame.time.Clock()
-    logic = Logic(SHAPE_H,SHAPE_W)
+    logic = Logic(SHAPE_H, SHAPE_W)
     logic.shuffleTiles(200)  # 初始化开局：随机移动n次
     COUNT = pygame.USEREVENT + 1
     pygame.time.set_timer(COUNT, 1000)
