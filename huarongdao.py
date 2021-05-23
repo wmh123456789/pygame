@@ -7,7 +7,7 @@ import pygame
 
 FPS = 60
 SHAPE = 4  # 棋盘shape
-CELL_SIZE = 100  # 方格大小
+CELL_SIZE = 150  # 方格大小
 CELL_GAP_SIZE = (int)(0.08*CELL_SIZE)  # 方格间距
 BORDER_R = (int)(0.15*CELL_SIZE) # 方格圆角半径
 MARGIN = (int)(0.08*CELL_SIZE)  # 方格的margin
